@@ -68,10 +68,6 @@ def _impl(ctx):
     ctx.actions.expand_template(
         template = ctx.file._all_tpl,
         substitutions = {
-            "%{async_push_statements}": "\n".join([
-                "async \"%s\"" % _get_runfile_path(ctx, command)
-                for command in scripts
-            ]),
             "%{push_statements}": "\n".join([
                 "\"%s\"" % _get_runfile_path(ctx, command)
                 for command in scripts

@@ -25,24 +25,34 @@ function guess_runfiles() {
     fi
 }
 
-RUNFILES="${PYTHON_RUNFILES:-$(guess_runfiles)}"
+function parallel() {
+    local proc procs
+    declare -a procs=() # this declares procs as an array
 
-PIDS=()
-function async() {
-    # Launch the command asynchronously and track its process id.
-    PYTHON_RUNFILES=${RUNFILES} "$@" &
-    PIDS+=($!)
+    morework=true
+    while $morework; do
+        if [[ "${#procs[@]}" -lt "$POOL_SIZE" ]]; then
+            read proc || { morework=false; continue ;}
+            eval "$proc" &
+            procs["${#procs[@]}"]="$!"
+        fi
+
+        for n in "${!procs[@]}"; do
+            kill -0 "${procs[n]}" 2>/dev/null && continue
+            unset procs[n]
+        done
+    done
+
+    wait
 }
+
+RUNFILES="${PYTHON_RUNFILES:-$(guess_runfiles)}"
 
 SEQUENTIAL="%{sequential}"
 if [ -z "${SEQUENTIAL}" ]; then
-  %{async_push_statements}
-  # Wait for all of the subprocesses, failing the script if any of them failed.
-  if [ "${#PIDS[@]}" != 0 ]; then
-    for pid in ${PIDS[@]}; do
-      wait ${pid}
-    done
-  fi
+  POOL_SIZE=10 parallel <<EOF
+%{push_statements}
+EOF
 else
   %{push_statements}
 fi
