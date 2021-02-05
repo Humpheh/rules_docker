@@ -25,6 +25,7 @@ function guess_runfiles() {
     fi
 }
 
+# Source: https://milhouse.dev/2015/11/20/writing-a-process-pool-in-bash/
 function parallel() {
     local proc procs
     declare -a procs=() # this declares procs as an array
