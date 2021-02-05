@@ -72,7 +72,7 @@ def _impl(ctx):
                 "\"%s\"" % _get_runfile_path(ctx, command)
                 for command in scripts
             ]),
-            "%{pool_size}": "%s" % ctx.attr.pool_size if ctx.attr.sequential else "1"
+            "%{pool_size}": "1" if ctx.attr.sequential else ("%s" % ctx.attr.pool_size)
         },
         output = ctx.outputs.executable,
         is_executable = True,
@@ -107,7 +107,7 @@ container_push = rule(
         ),
         "pool_size": attr.int(
             default = 50,
-            doc = "When sequential, the maximum number of images to push sequentially.",
+            doc = "When not sequential, the maximum number of images to push concurrently.",
         ),
         "_all_tpl": attr.label(
             default = Label("//contrib:push-all.sh.tpl"),
