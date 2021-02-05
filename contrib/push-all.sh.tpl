@@ -31,7 +31,7 @@ function parallel() {
 
     morework=true
     while $morework; do
-        if [[ "${#procs[@]}" -lt "$POOL_SIZE" ]]; then
+        if [[ "${#procs[@]}" -lt "%{pool_size}" ]]; then
             read proc || { morework=false; continue ;}
             eval "$proc" &
             procs["${#procs[@]}"]="$!"
@@ -48,13 +48,8 @@ function parallel() {
 
 RUNFILES="${PYTHON_RUNFILES:-$(guess_runfiles)}"
 
-SEQUENTIAL="%{sequential}"
-if [ -z "${SEQUENTIAL}" ]; then
-  POOL_SIZE=10 parallel <<EOF
+parallel <<EOF
 %{push_statements}
 EOF
-else
-  %{push_statements}
-fi
 
 
