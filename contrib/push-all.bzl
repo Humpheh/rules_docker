@@ -72,7 +72,7 @@ def _impl(ctx):
                 "\"%s\"" % _get_runfile_path(ctx, command)
                 for command in scripts
             ]),
-            "%{pool_size}": ctx.attr.pool_size if ctx.attr.sequential else 1
+            "%{pool_size}": "%s" % ctx.attr.pool_size if ctx.attr.sequential else "1"
         },
         output = ctx.outputs.executable,
         is_executable = True,
