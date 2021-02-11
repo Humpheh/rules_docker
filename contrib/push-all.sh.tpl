@@ -25,11 +25,12 @@ function guess_runfiles() {
     fi
 }
 
-# Source: https://milhouse.dev/2015/11/20/writing-a-process-pool-in-bash/
+# Adapted from: https://milhouse.dev/2015/11/20/writing-a-process-pool-in-bash/
 function parallel() {
     local proc procs
     declare -a procs=() # this declares procs as an array
 
+    failed=false
     morework=true
     while $morework; do
         if [[ "${#procs[@]}" -lt "%{pool_size}" ]]; then
@@ -40,11 +41,22 @@ function parallel() {
 
         for n in "${!procs[@]}"; do
             kill -0 "${procs[n]}" 2>/dev/null && continue
+
+            # Check if the process failed or not
+            wait "${procs[n]}"
+            status=$?
+            if [ $status -ne 0 ]; then
+              failed=true
+            fi
+
             unset procs[n]
         done
     done
 
     wait
+    if $failed; then
+      exit 1
+    fi
 }
 
 RUNFILES="${PYTHON_RUNFILES:-$(guess_runfiles)}"
