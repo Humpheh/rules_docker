@@ -51,6 +51,7 @@ function parallel() {
 
             unset procs[n]
         done
+        sleep 0.1s
     done
 
     wait
